@@ -30,5 +30,6 @@ namespace AuthService.Domain.Entities
         // Relaciones
         public virtual Persona Persona { get; set; } = null!;
         public virtual Rol Rol { get; set; } = null!;
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

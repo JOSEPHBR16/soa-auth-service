@@ -18,6 +18,7 @@ namespace AuthService.Infrastructure.Data
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Persona> Personas { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Curso> Cursos { get; set; }
         public DbSet<Matricula> Matriculas { get; set; }
         public DbSet<Nota> Notas { get; set; }
@@ -51,7 +52,10 @@ namespace AuthService.Infrastructure.Data
                 .HasForeignKey(u => u.RolID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(r => r.Usuario)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(r => r.UsuarioID);
 
             // ============================================================
             // USUARIO (Docente) ↔ CURSOS (1:N)
@@ -165,6 +169,13 @@ namespace AuthService.Infrastructure.Data
                 .Property(p => p.FechaHoraCreacion)
                 .HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<PeriodoAcademico>()
+                .Property(p => p.EstadoRegistro)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<RefreshToken>()
+                .Property(p => p.FechaHoraCreacion)
+                .HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<RefreshToken>()
                 .Property(p => p.EstadoRegistro)
                 .HasDefaultValue(true);
 

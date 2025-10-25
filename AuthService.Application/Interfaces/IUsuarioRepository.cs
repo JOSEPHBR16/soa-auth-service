@@ -12,7 +12,10 @@ namespace AuthService.Application.Interfaces
         Task<List<Persona>> GetAllAsync();
         Task<Persona?> GetByEmailAsync(string correo);
         Task<Persona?> GetPersonaWithUsuarioAsync(string email);
+        Task<Persona?> GetPersonaByUsuarioIdAsync(int usuarioId);
         Task AddAsync(Persona persona);
+        Task AddRefreshTokenAsync(RefreshToken token);
+        Task<RefreshToken?> GetRefreshTokenAsync(string token);
         Task SaveChangesAsync();
     }
 }

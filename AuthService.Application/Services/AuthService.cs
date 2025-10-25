@@ -11,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 //using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using static AuthService.Application.DTOs.LoginDto;
 
 namespace AuthService.Application.Services
 {
@@ -25,27 +26,141 @@ namespace AuthService.Application.Services
             _config = config;
         }
 
-        // 🔐 LOGIN
-        public async Task<RequestResult<string>> LoginAsync(string correo, string password)
+        // LOGIN
+        public async Task<RequestResult> LoginAsync(LoginRequest request)
         {
-            var persona = await _usuarioRepository.GetPersonaWithUsuarioAsync(correo);
+            var persona = await _usuarioRepository.GetPersonaWithUsuarioAsync(request.Correo);
             if (persona == null || persona.Usuario == null)
-                return RequestResult.WithError<string>("Usuario o contraseña incorrectos");
+                return RequestResult.WithError("Usuario o contraseña incorrectos");
 
-            bool passwordValid = BCrypt.Net.BCrypt.Verify(password, persona.Usuario.PasswordHash);
-            if (!passwordValid)
-                return RequestResult.WithError<string>("Usuario o contraseña incorrectos");
+            var usuario = persona.Usuario;
 
-            var token = GenerateJwtToken(persona);
-            return RequestResult.Success(token);
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, usuario.PasswordHash))
+            {
+                usuario.IntentosFallidosLogin++;
+                if (usuario.IntentosFallidosLogin >= 3)
+                {
+                    usuario.FechaBloqueo = DateTime.Now;
+                    await _usuarioRepository.SaveChangesAsync();
+                    return RequestResult.WithError("Cuenta bloqueada temporalmente");
+                }
+
+                await _usuarioRepository.SaveChangesAsync();
+                return RequestResult.WithError("Usuario o contraseña incorrectos");
+            }
+
+            usuario.IntentosFallidosLogin = 0;
+            usuario.UltimoAcceso = DateTime.Now;
+            await _usuarioRepository.SaveChangesAsync();
+
+            // JWT + Refresh Token
+            var accessToken = GenerateJwtToken(persona);
+            var refreshToken = new RefreshToken
+            {
+                Token = Guid.NewGuid().ToString("N"),
+                Expiration = DateTime.Now.AddDays(7),
+                UsuarioID = usuario.UsuarioID,
+                Revoked = false
+            };
+
+            await _usuarioRepository.AddRefreshTokenAsync(refreshToken);
+            await _usuarioRepository.SaveChangesAsync();
+
+            var response = new LoginResponse
+            {
+                User = new UserLoginDto
+                {
+                    UsuarioID = usuario.UsuarioID,
+                    CodigoUsuario = usuario.CodigoUsuario,
+                    Nombres = persona.Nombres,
+                    ApellidoPaterno = persona.ApellidoPaterno,
+                    ApellidoMaterno = persona.ApellidoMaterno,
+                    Email = persona.Email ?? "",
+                    RolID = usuario.RolID,
+                    Rol = usuario.Rol?.Nombre ?? "SinRol",
+                    Telefono = persona.Telefono
+                },
+                Token = new TokenLoginDto
+                {
+                    Access_Token = accessToken,
+                    Expires_In = 7200,
+                    Token_Type = "Jwt"
+                },
+                RefreshToken = refreshToken.Token
+            };
+
+            return RequestResult.Success(response);
         }
 
-        // 🧾 REGISTRO
-        public async Task<RequestResult<bool>> RegisterAsync(RegisterRequest request)
+        // REFRESH TOKEN
+        public async Task<RequestResult<LoginResponse>> RefreshTokenAsync(string refreshToken)
+        {
+            var tokenEntity = await _usuarioRepository.GetRefreshTokenAsync(refreshToken);
+            if (tokenEntity == null || tokenEntity.Revoked || tokenEntity.Expiration < DateTime.Now)
+                return RequestResult.WithError<LoginResponse>("Token inválido o expirado");
+
+            var persona = await _usuarioRepository.GetPersonaByUsuarioIdAsync(tokenEntity.UsuarioID);
+            if (persona == null)
+                return RequestResult.WithError<LoginResponse>("Usuario no encontrado");
+
+            tokenEntity.Revoked = true;
+            var newToken = new RefreshToken
+            {
+                Token = Guid.NewGuid().ToString("N"),
+                Expiration = DateTime.Now.AddDays(7),
+                UsuarioID = tokenEntity.UsuarioID
+            };
+
+            await _usuarioRepository.AddRefreshTokenAsync(newToken);
+            await _usuarioRepository.SaveChangesAsync();
+
+            var jwt = GenerateJwtToken(persona);
+
+            var response = new LoginResponse
+            {
+                User = new UserLoginDto
+                {
+                    UsuarioID = persona.Usuario.UsuarioID,
+                    CodigoUsuario = persona.Usuario.CodigoUsuario,
+                    Nombres = persona.Nombres,
+                    ApellidoPaterno = persona.ApellidoPaterno,
+                    ApellidoMaterno = persona.ApellidoMaterno,
+                    Email = persona.Email ?? "",
+                    RolID = persona.Usuario.RolID,
+                    Rol = persona.Usuario.Rol?.Nombre ?? "SinRol",
+                    Telefono = persona.Telefono
+                },
+                Token = new TokenLoginDto
+                {
+                    Access_Token = jwt,
+                    Expires_In = 7200,
+                    Token_Type = "Jwt"
+                },
+                RefreshToken = newToken.Token
+            };
+
+            return RequestResult.Success(response);
+        }
+
+        // LOGOUT
+        public async Task<RequestResult> LogoutAsync(string refreshToken)
+        {
+            var tokenEntity = await _usuarioRepository.GetRefreshTokenAsync(refreshToken);
+            if (tokenEntity == null)
+                return RequestResult.WithError("Token no encontrado");
+
+            tokenEntity.Revoked = true;
+            await _usuarioRepository.SaveChangesAsync();
+
+            return RequestResult.Success(true);
+        }
+
+        // REGISTRO
+        public async Task<RequestResult> RegisterAsync(RegisterRequest request)
         {
             var exists = await _usuarioRepository.GetPersonaWithUsuarioAsync(request.Email);
             if (exists != null)
-                return RequestResult.WithError<bool>("El correo ya está registrado");
+                return RequestResult.WithError("El correo ya está registrado");
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
@@ -80,7 +195,7 @@ namespace AuthService.Application.Services
             return RequestResult.Success(true);
         }
 
-        // ⚙️ Genera el JWT
+        // Genera el JWT
         private string GenerateJwtToken(Persona persona)
         {
             var claims = new[]
@@ -91,10 +206,9 @@ namespace AuthService.Application.Services
                 new Claim(ClaimTypes.Role, persona.Usuario?.Rol?.Nombre ?? "SinRol")
             };
 
-            // Obtener clave desde el Key Vault (ya cargada en _config)
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddHours(2);
+            var expires = DateTime.Now.AddHours(double.Parse(_config["Jwt:ExpiresHours"] ?? "2"));
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],

@@ -43,6 +43,26 @@ namespace AuthService.Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.Email == email && p.EstadoRegistro);
         }
 
+        public async Task<Persona?> GetPersonaByUsuarioIdAsync(int usuarioId)
+        {
+            return await _context.Personas
+                .Include(p => p.Usuario)
+                    .ThenInclude(u => u.Rol)
+                .FirstOrDefaultAsync(p => p.Usuario.UsuarioID == usuarioId && p.EstadoRegistro);
+        }
+
+        public async Task AddRefreshTokenAsync(RefreshToken token)
+        {
+            await _context.RefreshTokens.AddAsync(token);
+        }
+
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+        {
+            return await _context.RefreshTokens
+                .Include(r => r.Usuario)
+                .FirstOrDefaultAsync(r => r.Token == token);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

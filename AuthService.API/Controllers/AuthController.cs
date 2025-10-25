@@ -1,4 +1,5 @@
-﻿using AuthService.Application.Interfaces;
+﻿using AuthService.Application.DTOs;
+using AuthService.Application.Interfaces;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +17,23 @@ namespace AuthService.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest request)
+        public async Task<IActionResult> Login(LoginDto.LoginRequest request)
         {
-            var result = await _authService.LoginAsync(request.Correo, request.Password);
+            var result = await _authService.LoginAsync(request);
+            return Ok(result);
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(string refreshToken)
+        {
+            var result = await _authService.LogoutAsync(refreshToken);
+            return Ok(result);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(string refreshToken)
+        {
+            var result = await _authService.RefreshTokenAsync(refreshToken);
             return Ok(result);
         }
 
@@ -28,21 +43,5 @@ namespace AuthService.API.Controllers
             var result = await _authService.RegisterAsync(request);
             return Ok(result);
         }
-
-        public class LoginRequest
-        {
-            public string Correo { get; set; } = string.Empty;
-            public string Password { get; set; } = string.Empty;
-        }
-
-        //public class RegisterRequest
-        //{
-        //    public string Nombres { get; set; } = string.Empty;
-        //    public string ApellidoPaterno { get; set; } = string.Empty;
-        //    public string ApellidoMaterno { get; set; } = string.Empty;
-        //    public string Email { get; set; } = string.Empty;
-        //    public string Password { get; set; } = string.Empty;
-        //    public string Rol { get; set; } = "Alumno";
-        //}
     }
 }
