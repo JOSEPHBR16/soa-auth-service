@@ -3,6 +3,10 @@ using AuthService.Application.DTOs;
 using AuthService.Application.Interfaces;
 using AuthService.Domain.Entities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+
+
 //using Microsoft.IdentityModel.Tokens;
 //using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -24,56 +28,83 @@ namespace AuthService.Application.Services
         // 🔐 LOGIN
         public async Task<RequestResult<string>> LoginAsync(string correo, string password)
         {
-            var usuario = await _usuarioRepository.GetByEmailAsync(correo);
-            if (usuario == null || !(password == usuario.PasswordHash))
+            var persona = await _usuarioRepository.GetPersonaWithUsuarioAsync(correo);
+            if (persona == null || persona.Usuario == null)
                 return RequestResult.WithError<string>("Usuario o contraseña incorrectos");
 
-            var token = GenerateJwtToken(usuario);
+            bool passwordValid = BCrypt.Net.BCrypt.Verify(password, persona.Usuario.PasswordHash);
+            if (!passwordValid)
+                return RequestResult.WithError<string>("Usuario o contraseña incorrectos");
+
+            var token = GenerateJwtToken(persona);
             return RequestResult.Success(token);
         }
 
         // 🧾 REGISTRO
         public async Task<RequestResult<bool>> RegisterAsync(RegisterRequest request)
         {
-            var exists = await _usuarioRepository.GetByEmailAsync(request.Email);
-            if (exists != null) return RequestResult.WithError<bool>("El usuario ya existe");
+            var exists = await _usuarioRepository.GetPersonaWithUsuarioAsync(request.Email);
+            if (exists != null)
+                return RequestResult.WithError<bool>("El correo ya está registrado");
 
-            //var rol = await _context.Roles.FirstOrDefaultAsync(r => r.Nombre == request.Rol);
-            //if (rol == null) return false;
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-            var usuario = new Usuario
+            var persona = new Persona
             {
-                CodigoUsuario = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                CodigoPersona = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
                 Nombres = request.Nombres,
                 ApellidoPaterno = request.ApellidoPaterno,
                 ApellidoMaterno = request.ApellidoMaterno,
                 Email = request.Email,
-                PasswordHash = request.Password, // En producción: usar hash real
+                TipoDocumento = request.TipoDocumento,
+                NumeroDocumento = request.NumeroDocumento,
                 //RolID = rol.RolID,
                 FechaHoraCreacion = DateTime.Now,
                 EstadoRegistro = true
             };
 
-            await _usuarioRepository.AddAsync(usuario);
+            var usuario = new Usuario
+            {
+                CodigoUsuario = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                PasswordHash = hashedPassword,
+                RolID = request.RolID,
+                FechaHoraCreacion = DateTime.Now,
+                EstadoRegistro = true
+            };
+
+            persona.Usuario = usuario;
+
+            await _usuarioRepository.AddAsync(persona);
             await _usuarioRepository.SaveChangesAsync();
 
             return RequestResult.Success(true);
         }
 
         // ⚙️ Genera el JWT
-        private string GenerateJwtToken(Usuario usuario)
+        private string GenerateJwtToken(Persona persona)
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, usuario.Email),
-                //new Claim(ClaimTypes.Role, usuario.Rol)
+                new Claim(ClaimTypes.NameIdentifier, persona.PersonaID.ToString()),
+                new Claim(ClaimTypes.Name, $"{persona.Nombres} {persona.ApellidoPaterno}"),
+                new Claim(ClaimTypes.Email, persona.Email ?? ""),
+                new Claim(ClaimTypes.Role, persona.Usuario?.Rol?.Nombre ?? "SinRol")
             };
 
-            //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-            //var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            //var token = new JwtSecurityToken(claims: claims, expires: DateTime.Now.AddHours(2), signingCredentials: creds);
-            //return new JwtSecurityTokenHandler().WriteToken(token);
-            return "";
+            // Obtener clave desde el Key Vault (ya cargada en _config)
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddHours(2);
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

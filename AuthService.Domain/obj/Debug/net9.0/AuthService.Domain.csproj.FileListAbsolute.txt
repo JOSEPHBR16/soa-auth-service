@@ -16,6 +16,7 @@ C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug
 C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug\net9.0\AuthService.Domain.AssemblyInfoInputs.cache
 C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug\net9.0\AuthService.Domain.AssemblyInfo.cs
 C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug\net9.0\AuthService.Domain.csproj.CoreCompileInputs.cache
+C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug\net9.0\AuthService.Domain.sourcelink.json
 C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug\net9.0\AuthService.Domain.dll
 C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug\net9.0\refint\AuthService.Domain.dll
 C:\Users\josep\Desktop\SOA-Colegio\soa-auth-service\AuthService.Domain\obj\Debug\net9.0\AuthService.Domain.pdb

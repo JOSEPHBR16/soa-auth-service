@@ -17,6 +17,7 @@ namespace AuthService.Infrastructure.Data
 
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Persona> Personas { get; set; }
         public DbSet<Curso> Cursos { get; set; }
         public DbSet<Matricula> Matriculas { get; set; }
         public DbSet<Nota> Notas { get; set; }
@@ -28,6 +29,20 @@ namespace AuthService.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
 
             // ============================================================
+            // PERSONA ↔ USUARIO (1:1)
+            // ============================================================
+            modelBuilder.Entity<Persona>()
+                .HasOne(p => p.Usuario)
+                .WithOne(u => u.Persona)
+                .HasForeignKey<Usuario>(u => u.PersonaID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Índices únicos
+            modelBuilder.Entity<Persona>().HasIndex(u => u.Email).IsUnique();
+            modelBuilder.Entity<Persona>().HasIndex(u => u.NumeroDocumento).IsUnique();
+            modelBuilder.Entity<Persona>().HasIndex(u => u.CodigoPersona).IsUnique();
+
+            // ============================================================
             // ROLES ↔ USUARIOS (1:N)
             // ============================================================
             modelBuilder.Entity<Usuario>()
@@ -36,10 +51,7 @@ namespace AuthService.Infrastructure.Data
                 .HasForeignKey(u => u.RolID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Índices únicos
-            modelBuilder.Entity<Usuario>().HasIndex(u => u.Email).IsUnique();
-            modelBuilder.Entity<Usuario>().HasIndex(u => u.NumeroDocumento).IsUnique();
-            modelBuilder.Entity<Usuario>().HasIndex(u => u.CodigoUsuario).IsUnique();
+            
 
             // ============================================================
             // USUARIO (Docente) ↔ CURSOS (1:N)
@@ -123,8 +135,7 @@ namespace AuthService.Infrastructure.Data
                 .HasForeignKey(pa => pa.AlumnoID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<PeriodoAcademico>()
-                .HasKey(p => p.PeriodoID);
+            modelBuilder.Entity<PeriodoAcademico>().HasKey(p => p.PeriodoID);
 
             // ============================================================
             // CONFIGURACIONES ADICIONALES (Auditoría y defaults)
@@ -166,6 +177,10 @@ namespace AuthService.Infrastructure.Data
                 .HasDefaultValue(true);
 
             modelBuilder.Entity<Usuario>()
+                .Property(p => p.EstadoRegistro)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<Persona>()
                 .Property(p => p.EstadoRegistro)
                 .HasDefaultValue(true);
         }

@@ -9,9 +9,10 @@ namespace AuthService.Application.Interfaces
 {
     public interface IUsuarioRepository
     {
-        Task<List<Usuario>> GetAllAsync();
-        Task<Usuario?> GetByEmailAsync(string correo);
-        Task AddAsync(Usuario usuario);
+        Task<List<Persona>> GetAllAsync();
+        Task<Persona?> GetByEmailAsync(string correo);
+        Task<Persona?> GetPersonaWithUsuarioAsync(string email);
+        Task AddAsync(Persona persona);
         Task SaveChangesAsync();
     }
 }

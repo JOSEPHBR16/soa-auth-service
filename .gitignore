@@ -338,3 +338,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Archivos y carpetas de compilación .NET
+bin/
+obj/
+bin/*
+obj/*

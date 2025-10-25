@@ -18,10 +18,10 @@ namespace AuthService.Application.Services
             _repository = repository;
         }
 
-        public async Task<RequestResult<List<UsuarioDto>>> GetAllAsync()
+        public async Task<RequestResult<List<PersonaDto>>> GetAllAsync()
         {
             var users = await _repository.GetAllAsync();
-            return RequestResult.Success(users.Select(u => new UsuarioDto(u)).ToList());
+            return RequestResult.Success(users.Select(u => new PersonaDto(u)).ToList());
         }
     }
 }

@@ -57,6 +57,18 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Azure.Extensions.AspNetCore.Configuration.Secrets": {
+              "target": "Package",
+              "version": "[1.4.0, )"
+            },
+            "Azure.Identity": {
+              "target": "Package",
+              "version": "[1.17.0, )"
+            },
+            "Azure.Security.KeyVault.Secrets": {
+              "target": "Package",
+              "version": "[4.8.0, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[9.0.10, )"
@@ -178,6 +190,10 @@
             "Microsoft.Extensions.DependencyInjection.Abstractions": {
               "target": "Package",
               "version": "[9.0.10, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.14.0, )"
             }
           },
           "imports": [

@@ -13,6 +13,8 @@ namespace AuthService.Application.DTOs
         public string ApellidoMaterno { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string Rol { get; set; } = "Alumno";
+        public int RolID { get; set; }
+        public string TipoDocumento { get; set; } = string.Empty;
+        public string NumeroDocumento { get; set; } = string.Empty;
     }
 }

@@ -10,6 +10,6 @@ namespace AuthService.Application.Interfaces
 {
     public interface IUsuarioService
     {
-        Task<RequestResult<List<UsuarioDto>>> GetAllAsync();
+        Task<RequestResult<List<PersonaDto>>> GetAllAsync();
     }
 }

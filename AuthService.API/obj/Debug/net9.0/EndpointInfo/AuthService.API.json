@@ -119,7 +119,15 @@
             "type": "string",
             "nullable": true
           },
-          "rol": {
+          "rolID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipoDocumento": {
+            "type": "string",
+            "nullable": true
+          },
+          "numeroDocumento": {
             "type": "string",
             "nullable": true
           }

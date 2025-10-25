@@ -19,20 +19,28 @@ namespace AuthService.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<Usuario>> GetAllAsync()
+        public async Task<List<Persona>> GetAllAsync()
         {
             //return await _context.Usuarios.Include(u => u.Rol).ToListAsync();
-            return await _context.Usuarios.ToListAsync();
+            return await _context.Personas.ToListAsync();
         }
 
-        public async Task AddAsync(Usuario usuario)
+        public async Task AddAsync(Persona persona)
         {
-            await _context.Usuarios.AddAsync(usuario);
+            await _context.Personas.AddAsync(persona);
         }
 
-        public async Task<Usuario?> GetByEmailAsync(string correo)
+        public async Task<Persona?> GetByEmailAsync(string correo)
         {
-            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == correo && u.EstadoRegistro == true);
+            return await _context.Personas.FirstOrDefaultAsync(u => u.Email == correo && u.EstadoRegistro == true);
+        }
+
+        public async Task<Persona?> GetPersonaWithUsuarioAsync(string email)
+        {
+            return await _context.Personas
+                .Include(p => p.Usuario)
+                    .ThenInclude(u => u.Rol)
+                .FirstOrDefaultAsync(p => p.Email == email && p.EstadoRegistro);
         }
 
         public async Task SaveChangesAsync()

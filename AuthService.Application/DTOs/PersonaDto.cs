@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 
 namespace AuthService.Application.DTOs
 {
-    public class UsuarioDto
+    public class PersonaDto
     {
         public string NombreCompleto { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;
 
-        public UsuarioDto() { }
-        
-        //public UsuarioDto(Usuario usuario)
-        //{
-        //    NombreCompleto = $"{usuario.Nombres} {usuario.ApellidoPaterno} {usuario.ApellidoMaterno}";
-        //    Correo = usuario.Email;
-        //    Rol = usuario.Rol?.Nombre ?? string.Empty;
-        //}
+        public PersonaDto() { }
+
+        public PersonaDto(Persona usuario)
+        {
+            NombreCompleto = $"{usuario.Nombres} {usuario.ApellidoPaterno} {usuario.ApellidoMaterno}";
+            Correo = usuario.Email;
+            //Rol = usuario.Rol?.Nombre ?? string.Empty;
+        }
     }
 }
