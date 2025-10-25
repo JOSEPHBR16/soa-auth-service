@@ -14,7 +14,7 @@ namespace AuthService.Domain.Entities
         public decimal? ValorNota { get; set; }
         public string? ObservacionDocente { get; set; }
         public DateTime? FechaEvaluacion { get; set; }
-        public int UsuarioDocenteID { get; set; }
+        public int DocenteID { get; set; }
         public bool? EstadoRegistro { get; set; }
         public string? UsuarioCreacion { get; set; }
         public DateTime? FechaHoraCreacion { get; set; }

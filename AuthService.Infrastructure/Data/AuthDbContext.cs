@@ -117,7 +117,7 @@ namespace AuthService.Infrastructure.Data
             modelBuilder.Entity<Nota>()
                 .HasOne(n => n.Docente)
                 .WithMany() // o .WithMany(u => u.NotasRegistradas)
-                .HasForeignKey(n => n.UsuarioDocenteID)
+                .HasForeignKey(n => n.DocenteID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // ============================================================
