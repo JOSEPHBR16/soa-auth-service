@@ -11,9 +11,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddAzureKeyVault(
-    new Uri("https://soa-colegio-vault.vault.azure.net/"),
-    new DefaultAzureCredential());
+//builder.Configuration.AddAzureKeyVault(
+//    new Uri("https://soa-colegio-vault.vault.azure.net/"),
+//    new DefaultAzureCredential());
 
 // EF Core
 builder.Services.AddDbContext<AuthDbContext>(options =>

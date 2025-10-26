@@ -26,6 +26,9 @@ namespace AuthService.Application.Services
             _config = config;
         }
 
+        private const int MaxIntentosFallidos = 3;
+        private static readonly TimeSpan DuracionBloqueo = TimeSpan.FromMinutes(5);
+
         // LOGIN
         public async Task<RequestResult> LoginAsync(LoginRequest request)
         {
@@ -35,14 +38,32 @@ namespace AuthService.Application.Services
 
             var usuario = persona.Usuario;
 
+            if (usuario.FechaBloqueo.HasValue)
+            {
+                var tiempoTranscurrido = DateTime.Now - usuario.FechaBloqueo.Value;
+
+                if (tiempoTranscurrido < DuracionBloqueo)
+                {
+                    var minutosRestantes = Math.Ceiling((DuracionBloqueo - tiempoTranscurrido).TotalMinutes);
+                    return RequestResult.WithError($"Cuenta bloqueada temporalmente. Intenta nuevamente en {minutosRestantes} minuto(s).");
+                }
+                else
+                {
+                    usuario.FechaBloqueo = null;
+                    usuario.IntentosFallidosLogin = 0;
+                    await _usuarioRepository.SaveChangesAsync();
+                }
+            }
+
             if (!BCrypt.Net.BCrypt.Verify(request.Password, usuario.PasswordHash))
             {
                 usuario.IntentosFallidosLogin++;
-                if (usuario.IntentosFallidosLogin >= 3)
+
+                if (usuario.IntentosFallidosLogin >= MaxIntentosFallidos)
                 {
                     usuario.FechaBloqueo = DateTime.Now;
                     await _usuarioRepository.SaveChangesAsync();
-                    return RequestResult.WithError("Cuenta bloqueada temporalmente");
+                    return RequestResult.WithError("Cuenta bloqueada temporalmente por exceso de intentos fallidos.");
                 }
 
                 await _usuarioRepository.SaveChangesAsync();
@@ -50,6 +71,7 @@ namespace AuthService.Application.Services
             }
 
             usuario.IntentosFallidosLogin = 0;
+            usuario.FechaBloqueo = null;
             usuario.UltimoAcceso = DateTime.Now;
             await _usuarioRepository.SaveChangesAsync();
 
