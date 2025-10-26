@@ -68,7 +68,7 @@ namespace AuthService.Application.Services
 
             var response = new LoginResponse
             {
-                User = new UserLoginDto
+                Usuario = new UserLoginDto
                 {
                     UsuarioID = usuario.UsuarioID,
                     CodigoUsuario = usuario.CodigoUsuario,
@@ -82,9 +82,9 @@ namespace AuthService.Application.Services
                 },
                 Token = new TokenLoginDto
                 {
-                    Access_Token = accessToken,
-                    Expires_In = 7200,
-                    Token_Type = "Jwt"
+                    AccessToken = accessToken,
+                    ExpiresIn = 7200,
+                    TokenType = "Jwt"
                 },
                 RefreshToken = refreshToken.Token
             };
@@ -118,7 +118,7 @@ namespace AuthService.Application.Services
 
             var response = new LoginResponse
             {
-                User = new UserLoginDto
+                Usuario = new UserLoginDto
                 {
                     UsuarioID = persona.Usuario.UsuarioID,
                     CodigoUsuario = persona.Usuario.CodigoUsuario,
@@ -132,9 +132,9 @@ namespace AuthService.Application.Services
                 },
                 Token = new TokenLoginDto
                 {
-                    Access_Token = jwt,
-                    Expires_In = 7200,
-                    Token_Type = "Jwt"
+                    AccessToken = jwt,
+                    ExpiresIn = 7200,
+                    TokenType = "Jwt"
                 },
                 RefreshToken = newToken.Token
             };

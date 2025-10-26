@@ -16,7 +16,7 @@ namespace AuthService.Application.DTOs
 
         public class LoginResponse
         {
-            public UserLoginDto User { get; set; } = default!;
+            public UserLoginDto Usuario { get; set; } = default!;
             public TokenLoginDto Token { get; set; } = default!;
             public string? RefreshToken { get; set; }
             //public string? ResetPasswordUrl { get; set; }
@@ -37,9 +37,9 @@ namespace AuthService.Application.DTOs
 
         public class TokenLoginDto
         {
-            public string Access_Token { get; set; } = default!;
-            public int Expires_In { get; set; }
-            public string Token_Type { get; set; } = "Jwt";
+            public string AccessToken { get; set; } = default!;
+            public int ExpiresIn { get; set; }
+            public string TokenType { get; set; } = "Jwt";
         }
     }
 }
