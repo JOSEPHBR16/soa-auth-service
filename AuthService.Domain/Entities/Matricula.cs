@@ -12,14 +12,14 @@ namespace AuthService.Domain.Entities
         public int AlumnoID { get; set; }
         public int CursoID { get; set; }
         public int PeriodoID { get; set; }
-        public string CodigoMatricula { get; set; } = string.Empty;
+        public string CodigoMatricula { get; set; } = null!;
         public DateTime? FechaMatricula { get; set; } = DateTime.Now;
         public string EstadoMatricula { get; set; } = "Activa";
         public string? Observaciones { get; set; }
         public DateTime? FechaRetiro { get; set; }
 
         // AUDITORÍA
-        public bool? EstadoRegistro { get; set; } = true;
+        public bool EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
         public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }

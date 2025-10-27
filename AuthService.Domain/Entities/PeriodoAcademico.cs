@@ -9,7 +9,7 @@ namespace AuthService.Domain.Entities
     public class PeriodoAcademico
     {
         public int PeriodoID { get; set; }
-        public string NombrePeriodo { get; set; } = string.Empty;
+        public string NombrePeriodo { get; set; } = null!;
         public int Anio { get; set; }
         public int Trimestre { get; set; }
         public DateTime FechaInicio { get; set; }
@@ -19,7 +19,7 @@ namespace AuthService.Domain.Entities
         public string? Observaciones { get; set; }
 
         // AUDITORÍA
-        public bool? EstadoRegistro { get; set; } = true;
+        public bool EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
         public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }

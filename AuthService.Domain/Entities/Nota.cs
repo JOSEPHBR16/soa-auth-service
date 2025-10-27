@@ -17,7 +17,7 @@ namespace AuthService.Domain.Entities
         public int DocenteID { get; set; }
 
         // AUDITORÍA
-        public bool? EstadoRegistro { get; set; } = true;
+        public bool EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
         public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
