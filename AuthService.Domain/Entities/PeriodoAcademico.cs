@@ -17,14 +17,17 @@ namespace AuthService.Domain.Entities
         public DateTime? FechaCierreNotas { get; set; }
         public string Estado { get; set; } = "Activo";
         public string? Observaciones { get; set; }
-        public bool? EstadoRegistro { get; set; }
+
+        // AUDITORÍA
+        public bool? EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
-        public DateTime? FechaHoraCreacion { get; set; }
+        public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
-        // 🔗 Relaciones
-        public ICollection<Matricula>? Matriculas { get; set; }
-        public ICollection<Nota>? Notas { get; set; }
+        // RELACIONES
+        public virtual ICollection<Matricula> Matriculas { get; set; } = new List<Matricula>();
+        public virtual ICollection<AsignacionDocente> AsignacionesDocentes { get; set; } = new List<AsignacionDocente>();
+        public virtual ICollection<Nota> Notas { get; set; } = new List<Nota>();
     }
 }

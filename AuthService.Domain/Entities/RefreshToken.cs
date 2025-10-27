@@ -15,12 +15,14 @@ namespace AuthService.Domain.Entities
         public int UsuarioID { get; set; }
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
-        public bool? EstadoRegistro { get; set; }
+        // AUDITORÍA
+        public bool? EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
         public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
-        public Usuario Usuario { get; set; } = default!;
+        // RELACIONES
+        public virtual Usuario Usuario { get; set; } = null!;
     }
 }

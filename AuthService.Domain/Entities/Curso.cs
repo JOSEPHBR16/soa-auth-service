@@ -9,22 +9,23 @@ namespace AuthService.Domain.Entities
     public class Curso
     {
         public int CursoID { get; set; }
-        public string CodigoCurso { get; set; } = string.Empty;
-        public string Nombre { get; set; } = string.Empty;
-        public string Grado { get; set; } = string.Empty;
-        public string Seccion { get; set; } = string.Empty;
+        public string CodigoCurso { get; set; } = null!;
+        public string Nombre { get; set; } = null!;
+        public string Grado { get; set; } = null!;
+        public string Seccion { get; set; } = null!;
         public string? Descripcion { get; set; }
         public string? Modalidad { get; set; }
         public int? CapacidadMaxima { get; set; }
-        public int DocenteID { get; set; }
-        public bool? EstadoRegistro { get; set; }
+
+        // AUDITORÍA
+        public bool EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
-        public DateTime? FechaHoraCreacion { get; set; }
+        public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
-        // 🔗 Relaciones
-        public Usuario? Docente { get; set; }
-        public ICollection<Matricula>? Matriculas { get; set; }
+        // RELACIONES
+        public virtual ICollection<AsignacionDocente> AsignacionesDocentes { get; set; } = new List<AsignacionDocente>();
+        public virtual ICollection<Matricula> Matriculas { get; set; } = new List<Matricula>();
     }
 }

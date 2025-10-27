@@ -24,14 +24,14 @@ namespace AuthService.Domain.Entities
         public string? Direccion { get; set; }
         public string? FotoPerfilUrl { get; set; }
 
-        // Auditoría
+        // AUDITORÍA
         public bool EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
         public DateTime FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
-        // Relación 1:1 con Usuario
+        // RELACIONES
         public virtual Usuario? Usuario { get; set; }
     }
 }

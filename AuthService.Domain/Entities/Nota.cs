@@ -15,15 +15,17 @@ namespace AuthService.Domain.Entities
         public string? ObservacionDocente { get; set; }
         public DateTime? FechaEvaluacion { get; set; }
         public int DocenteID { get; set; }
-        public bool? EstadoRegistro { get; set; }
+
+        // AUDITORÍA
+        public bool? EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
-        public DateTime? FechaHoraCreacion { get; set; }
+        public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
-        // 🔗 Relaciones
-        public Matricula? Matricula { get; set; }
-        public PeriodoAcademico? Periodo { get; set; }
-        public Usuario? Docente { get; set; }
+        // RELACIONES
+        public virtual Matricula Matricula { get; set; } = null!;
+        public virtual PeriodoAcademico Periodo { get; set; } = null!;
+        public virtual Usuario Docente { get; set; } = null!;
     }
 }

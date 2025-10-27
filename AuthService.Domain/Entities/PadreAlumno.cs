@@ -11,20 +11,22 @@ namespace AuthService.Domain.Entities
         public int PadreAlumnoID { get; set; }
         public int PadreID { get; set; }
         public int AlumnoID { get; set; }
-        public string Parentesco { get; set; } = string.Empty;
+        public string Parentesco { get; set; } = null!;
         public string? TelefonoEmergencia { get; set; }
         public string? Direccion { get; set; }
         public string? EmailContacto { get; set; }
         public string EstadoRelacion { get; set; } = "Activa";
-        public DateTime? FechaRegistro { get; set; }
-        public bool? EstadoRegistro { get; set; }
+        public DateTime FechaRegistro { get; set; } = DateTime.Now;
+
+        // AUDITORÍA
+        public bool? EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
-        public DateTime? FechaHoraCreacion { get; set; }
+        public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
-        // 🔗 Relaciones
-        public Usuario? Padre { get; set; }
-        public Usuario? Alumno { get; set; }
+        // RELACIONES
+        public virtual Usuario Padre { get; set; } = null!;
+        public virtual Usuario Alumno { get; set; } = null!;
     }
 }

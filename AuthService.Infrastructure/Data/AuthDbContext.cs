@@ -15,15 +15,17 @@ namespace AuthService.Infrastructure.Data
         {
         }
 
-        public DbSet<Rol> Roles { get; set; }
-        public DbSet<Usuario> Usuarios { get; set; }
-        public DbSet<Persona> Personas { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<Curso> Cursos { get; set; }
-        public DbSet<Matricula> Matriculas { get; set; }
-        public DbSet<Nota> Notas { get; set; }
-        public DbSet<PadreAlumno> PadresAlumnos { get; set; }
-        public DbSet<PeriodoAcademico> PeriodosAcademicos { get; set; }
+        // DbSets
+        public DbSet<Rol> Roles => Set<Rol>();
+        public DbSet<Persona> Personas => Set<Persona>();
+        public DbSet<Usuario> Usuarios => Set<Usuario>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<PeriodoAcademico> PeriodosAcademicos => Set<PeriodoAcademico>();
+        public DbSet<Curso> Cursos => Set<Curso>();
+        public DbSet<AsignacionDocente> AsignacionesDocentes => Set<AsignacionDocente>();
+        public DbSet<Matricula> Matriculas => Set<Matricula>();
+        public DbSet<Nota> Notas => Set<Nota>();
+        public DbSet<PadreAlumno> PadresAlumnos => Set<PadreAlumno>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,12 +60,30 @@ namespace AuthService.Infrastructure.Data
                 .HasForeignKey(r => r.UsuarioID);
 
             // ============================================================
-            // USUARIO (Docente) ↔ CURSOS (1:N)
+            // CURSO ↔ ASIGNACIONES DOCENTES (1:N)
             // ============================================================
-            modelBuilder.Entity<Curso>()
-                .HasOne(c => c.Docente)
-                .WithMany() // o .WithMany(u => u.CursosDictados)
-                .HasForeignKey(c => c.DocenteID)
+            modelBuilder.Entity<AsignacionDocente>()
+                .HasOne(a => a.Curso)
+                .WithMany(c => c.AsignacionesDocentes)
+                .HasForeignKey(a => a.CursoID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ============================================================
+            // DOCENTE (USUARIO) ↔ ASIGNACIONES DOCENTES (1:N)
+            // ============================================================
+            modelBuilder.Entity<AsignacionDocente>()
+                .HasOne(a => a.Docente)
+                .WithMany(u => u.AsignacionesDocentes)
+                .HasForeignKey(a => a.DocenteID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ============================================================
+            // PERIODO ↔ ASIGNACIONES DOCENTES (1:N)
+            // ============================================================
+            modelBuilder.Entity<AsignacionDocente>()
+                .HasOne(a => a.Periodo)
+                .WithMany(p => p.AsignacionesDocentes)
+                .HasForeignKey(a => a.PeriodoID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Curso>().HasIndex(c => c.CodigoCurso).IsUnique();
@@ -82,7 +102,7 @@ namespace AuthService.Infrastructure.Data
             // ============================================================
             modelBuilder.Entity<Matricula>()
                 .HasOne(m => m.Alumno)
-                .WithMany() // o .WithMany(u => u.Matriculas)
+                .WithMany(u => u.Matriculas)
                 .HasForeignKey(m => m.AlumnoID)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -120,7 +140,7 @@ namespace AuthService.Infrastructure.Data
             // ============================================================
             modelBuilder.Entity<Nota>()
                 .HasOne(n => n.Docente)
-                .WithMany() // o .WithMany(u => u.NotasRegistradas)
+                .WithMany(u => u.Notas)
                 .HasForeignKey(n => n.DocenteID)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -140,60 +160,23 @@ namespace AuthService.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PeriodoAcademico>().HasKey(p => p.PeriodoID);
+            modelBuilder.Entity<AsignacionDocente>().HasKey(p => p.AsignacionID);
 
             // ============================================================
-            // CONFIGURACIONES ADICIONALES (Auditoría y defaults)
+            // AUDITORÍA Y VALORES POR DEFECTO
             // ============================================================
-            modelBuilder.Entity<Curso>()
-                .Property(c => c.FechaHoraCreacion)
-                .HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<Curso>()
-                .Property(c => c.EstadoRegistro)
-                .HasDefaultValue(true);
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                if (entity.FindProperty("EstadoRegistro") != null)
+                    modelBuilder.Entity(entity.ClrType)
+                        .Property("EstadoRegistro")
+                        .HasDefaultValue(true);
 
-            modelBuilder.Entity<Matricula>()
-                .Property(m => m.FechaHoraCreacion)
-                .HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<Matricula>()
-                .Property(m => m.EstadoRegistro)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<Nota>()
-                .Property(n => n.FechaHoraCreacion)
-                .HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<Nota>()
-                .Property(n => n.EstadoRegistro)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<PeriodoAcademico>()
-                .Property(p => p.FechaHoraCreacion)
-                .HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<PeriodoAcademico>()
-                .Property(p => p.EstadoRegistro)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<RefreshToken>()
-                .Property(p => p.FechaHoraCreacion)
-                .HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<RefreshToken>()
-                .Property(p => p.EstadoRegistro)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<PadreAlumno>()
-                .Property(p => p.EstadoRegistro)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<Rol>()
-                .Property(p => p.EstadoRegistro)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<Usuario>()
-                .Property(p => p.EstadoRegistro)
-                .HasDefaultValue(true);
-
-            modelBuilder.Entity<Persona>()
-                .Property(p => p.EstadoRegistro)
-                .HasDefaultValue(true);
+                if (entity.FindProperty("FechaHoraCreacion") != null)
+                    modelBuilder.Entity(entity.ClrType)
+                        .Property("FechaHoraCreacion")
+                        .HasDefaultValueSql("GETDATE()");
+            }
         }
     }
 }

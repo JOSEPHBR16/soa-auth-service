@@ -6,29 +6,25 @@ using System.Threading.Tasks;
 
 namespace AuthService.Domain.Entities
 {
-    public class Matricula
+    public class AsignacionDocente
     {
-        public int MatriculaID { get; set; }
-        public int AlumnoID { get; set; }
+        public int AsignacionID { get; set; }
         public int CursoID { get; set; }
+        public int DocenteID { get; set; }
         public int PeriodoID { get; set; }
-        public string CodigoMatricula { get; set; } = string.Empty;
-        public DateTime? FechaMatricula { get; set; } = DateTime.Now;
-        public string EstadoMatricula { get; set; } = "Activa";
+        public string? RolDocente { get; set; }
         public string? Observaciones { get; set; }
-        public DateTime? FechaRetiro { get; set; }
 
         // AUDITORÍA
-        public bool? EstadoRegistro { get; set; } = true;
+        public bool EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
-        public DateTime? FechaHoraCreacion { get; set; } = DateTime.Now;
+        public DateTime FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
         // RELACIONES
-        public virtual Usuario Alumno { get; set; } = null!;
         public virtual Curso Curso { get; set; } = null!;
+        public virtual Usuario Docente { get; set; } = null!;
         public virtual PeriodoAcademico Periodo { get; set; } = null!;
-        public virtual ICollection<Nota> Notas { get; set; } = new List<Nota>();
     }
 }

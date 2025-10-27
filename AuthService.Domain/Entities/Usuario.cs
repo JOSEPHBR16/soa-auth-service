@@ -20,16 +20,19 @@ namespace AuthService.Domain.Entities
         public DateTime? FechaIngreso { get; set; }
         public DateTime? FechaCese { get; set; }
 
-        // Auditoría
+        // AUDITORÍA
         public bool EstadoRegistro { get; set; } = true;
         public string? UsuarioCreacion { get; set; }
         public DateTime FechaHoraCreacion { get; set; } = DateTime.Now;
         public string? UsuarioActualizacion { get; set; }
         public DateTime? FechaHoraActualizacion { get; set; }
 
-        // Relaciones
+        // RELACIONES
         public virtual Persona Persona { get; set; } = null!;
         public virtual Rol Rol { get; set; } = null!;
-        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public virtual ICollection<AsignacionDocente> AsignacionesDocentes { get; set; } = new List<AsignacionDocente>();
+        public virtual ICollection<Matricula> Matriculas { get; set; } = new List<Matricula>();
+        public virtual ICollection<Nota> Notas { get; set; } = new List<Nota>();
     }
 }
